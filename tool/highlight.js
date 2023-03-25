@@ -1,13 +1,14 @@
+// @ts-nocheck
 import fs from "fs";
 import path from "path";
 import _ from "lodash";
-import hljs from "highlight.js/lib/highlight"; // TODO: Do not register languages
+import hljs from 'highlight.js';
 import CircularJSON from "circular-json";
 
 const NOTICE_COMMENT = "// GENERATED CODE - DO NOT MODIFY BY HAND\n\n";
 
 const dir = "node_modules/highlight.js/lib/languages";
-hljs.registerLanguage("cpp", require(path.resolve(dir, "cpp"))); // exports
+// hljs.registerLanguage("cpp", require(path.resolve(dir, "cpp"))); // exports
 
 const modeEntries = Object.entries(hljs).filter(
   ([k]) =>
@@ -104,6 +105,7 @@ function normalizeLanguageName(name) {
 
 export function allModes() {
   let all = "";
+  let exports = ['library highlight_languages;\n', `export 'all_languages.dart';`];
   let builtin = "final builtinLanguages = {";
   let community = "final communityLanguages = {";
 
@@ -114,26 +116,26 @@ export function allModes() {
       factory: require(path.resolve(dir, file)),
       community: false
     })),
-    {
-      name: "vue",
-      factory: require("../vendor/highlightjs-vue/vue").definer,
-      community: true
-    },
-    {
-      name: "graphql",
-      factory: require("../vendor/highlightjs-graphql").definer,
-      community: true
-    },
-    {
-      name: "gn",
-      factory: require("../vendor/highlightjs-GN").definer,
-      community: true
-    },
-    {
-      name: "solidity",
-      factory: require("../vendor/highlightjs-solidity").definer,
-      community: true
-    }
+    // {
+    //   name: "vue",
+    //   factory: require("../vendor/highlightjs-vue/vue").definer,
+    //   community: true
+    // },
+    // {
+    //   name: "graphql",
+    //   factory: require("../vendor/highlightjs-graphql").definer,
+    //   community: true
+    // },
+    // {
+    //   name: "gn",
+    //   factory: require("../vendor/highlightjs-GN").definer,
+    //   community: true
+    // },
+    // {
+    //   name: "solidity",
+    //   factory: require("../vendor/highlightjs-solidity").definer,
+    //   community: true
+    // }
   ];
 
   // ["json"]
@@ -205,7 +207,8 @@ export function allModes() {
           .replace(/\$/g, "\\$")
       );
 
-      all += `import '${originalLang}.dart';`;
+      all += `import 'languages/${originalLang}.dart';`;
+      exports.push(`export 'languages/${originalLang}.dart';`);
       if (item.community) {
         community += `'${originalLang}': ${lang},`;
       } else {
@@ -222,7 +225,13 @@ export function allModes() {
   all += community + builtin;
   all += "final allLanguages = {...builtinLanguages,...communityLanguages};";
   fs.writeFileSync(
-    `../highlight/lib/languages/all.dart`,
+    `../highlight/lib/all_languages.dart`,
     all.replace(/\$/g, "\\$")
   );
+  fs.writeFileSync(
+    `../highlight/lib/highlight_languages.dart`,
+    exports.join('\n')
+  );
 }
+
+allModes();

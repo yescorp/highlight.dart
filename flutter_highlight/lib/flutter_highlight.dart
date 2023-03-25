@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:highlight/highlight.dart' show highlight, Node;
+import 'package:highlight/highlight_core.dart';
 
 /// Highlight Flutter Widget
 class HighlightView extends StatelessWidget {
@@ -48,7 +49,8 @@ class HighlightView extends StatelessWidget {
             : TextSpan(text: node.value, style: theme[node.className!]));
       } else if (node.children != null) {
         List<TextSpan> tmp = [];
-        currentSpans.add(TextSpan(children: tmp, style: theme[node.className!]));
+        currentSpans
+            .add(TextSpan(children: tmp, style: theme[node.className!]));
         stack.add(currentSpans);
         currentSpans = tmp;
 
@@ -93,7 +95,8 @@ class HighlightView extends StatelessWidget {
       child: RichText(
         text: TextSpan(
           style: _textStyle,
-          children: _convert(highlight.parse(source, language: language).nodes!),
+          children:
+              _convert(highlight.highlight('python', source, true).nodes ?? []),
         ),
       ),
     );
